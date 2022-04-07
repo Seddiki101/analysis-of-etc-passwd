@@ -1,0 +1,248 @@
+#!/bin/bash
+
+
+#functions
+####################################################    args      #############################################################
+showusage()
+{
+echo "analyse.sh: [-h] [-v] [-t] [-m] [-g] [-v] [-n] [-p] user.. "
+}
+########################
+menutxt()
+{
+clear
+while :
+    do
+	echo " "
+	echo "-------------------------------------"
+	echo "            Main Menu "
+echo "taper h pour afficher le help"
+echo "taper g pour GUI "
+echo "taper v pour affciher les version et auteurs "
+echo "taper n pour afficher nombre d utilisateur "
+echo "taper p pour afficher les repertoire personnels "
+echo "taper G pour afficher les utilisateurs appartenant au meme groupe"
+echo "taper t pour type d utilisateur "
+echo "taper 0 pour quitter "
+
+read c
+
+case "$c" in
+"h") help ;;
+"v") version ;;
+"n") usernumber ;;
+"p") afficherduo ;;
+"g") radeon ;;
+"G") usergrp1 ;;
+"t") usertype1 ;;
+"0") exit ;;
+*) echo "mauvais choix" ;;
+esac
+
+done
+} 
+########################
+optimus() {
+while getopts "h:v:n:p:G:t:m" option
+
+do
+
+echo "getopts a trouvé l'option $option"
+
+case "$option" in
+"h") help ;;
+"v") version ;;
+"n") usernumber ;;
+"p") afficherduo ;;
+"G") usergrp ;;
+"t") usertype ;;
+"m") menutxt ;;
+*) echo "mauvais choix" ;;
+esac
+
+done
+}
+########################
+version()
+{
+echo "Version 0.1.2"
+echo "auteur :  Seddiki"
+}
+########################
+help()
+{
+cat help.txt
+}
+########################
+usernumber()
+{
+echo "the number of user is " 
+cut -d: -f1 /etc/passwd | wc -l
+}
+########################
+userlist()
+{
+cut -d: -f1 /etc/passwd
+}
+######################## nom user +grp arg 
+usergrp()
+{
+cat /etc/passwd | grep $1
+if [ $(getent group $1) ]; then
+  cat /etc/passwd | grep $1
+else
+  echo "group does not exist."
+fi
+}
+########################
+usertype()
+{
+type=$(id -u $1)
+if [ "$type" == "0" ] ; then echo "admin"
+elif [[ "$type" -gt "999" ]] ; then echo "simple user"
+elif [[ "$type" -gt "0" && $type -lt "999" ]] ; then echo "app"
+else echo "user doesn t exist"
+fi 
+}
+######################## repertoire personnel
+afficheduo()
+{
+cut -d: -f 1,6 /etc/passwd
+}
+
+####################################################    Menu      #############################################################
+usergrp1()
+{
+echo "type group"
+read gerps
+
+if [ $(getent group $gerps) ]; then
+  cat /etc/passwd | grep $gerps
+else
+  echo "group does not exist."
+fi
+}
+########################
+usertype1()
+{
+echo "type username"
+read user;
+type=$(id -u $user)
+if [ "$type" == "0" ] ; then echo "admin"
+elif [[ "$type" -gt "1000" ]] ; then echo "simple user"
+elif [[ "$type" -gt "0" && $type -lt "1000" ]] ; then echo "app"
+else echo "user doesn t exist"
+fi 
+}
+####################################################    GUI     #############################################################
+
+radeon=(
+
+yad
+
+  --center --width=800
+   --height=400
+   --image="gtk-dialog-info"
+   --title="Analyse etc/passwd"
+   --text="Choisir une option"
+    --text-align=center
+   --button="Exit":1
+   --form
+      
+      --field="AFFICHER le nombre des utilisateurs":btn "bash -c usernumber"
+      --field="AFFICHER les repertoires personnels ":btn "bash -c afficherduo"
+      --field="AFFICHER les utilisateurs appartenant au groupe donnee ":btn "bash -c usergrp2"
+      --field="AFFICHER le type d un utilisateur donnee ":btn "bash -c usertype2"
+      --field="HELP":btn "bash -c help"
+      --field="AFFICHER la version et les auteurs":btn "bash -c version"
+
+
+)
+
+########################
+usertype2()
+{
+
+frmdata=$(yad --title "user type" --form --field "username")
+
+
+user=$(echo $frmdata | awk 'BEGIN {FS="|" } { print $1 }')
+
+
+type=$(id -u $user)
+if [ "$type" == "0" ] ; then echo "admin"
+elif [[ "$type" -gt "1000" ]] ; then echo "simple user"
+elif [[ "$type" -gt "0" && $type -lt "1000" ]] ; then echo "app"
+else echo "user doesn t exist"
+fi 
+}
+########################
+usergrp2()
+{
+frmdata=$(yad --title "user group" --form --field "group")
+
+
+gerps=$(echo $frmdata | awk 'BEGIN {FS="|" } { print $1 }')
+
+
+if [ $(getent group "$gerps") ]; then
+  cat /etc/passwd | grep "$gerps"
+else
+  echo "group does not exist."
+fi
+}
+########################
+
+####################################################    Main      #############################################################
+
+
+#now code starts
+
+#cli
+
+
+if [ $# -lt "1" ]
+then showusage 
+else 
+{
+
+#
+export -f help 
+export -f version 
+export -f usernumber 
+# export -f afficherduo big problem
+export -f usergrp2 
+export -f usertype2
+export -f menutxt 
+
+
+
+
+
+while getopts "hvnpgG:t:m" option
+
+do
+
+#echo "getopts a trouvé l'option $option"
+
+case "$option" in
+"h") help ;;
+"v") version ;;
+"n") usernumber ;;
+"p") afficherduo ;;
+"g") "${radeon[@]}" ;;
+"G") usergrp "$2" ;;
+"t") usertype "$2" ;;
+"m") menutxt ;;
+*) echo "mauvais choix" ;;
+esac
+
+done
+#
+
+}
+fi
+
+
+
+

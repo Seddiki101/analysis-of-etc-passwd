@@ -1,0 +1,32 @@
+This is a script that analyses etc/passwd
+
+The file is composed of lines with the same structure , example :
+blank:x:1000:1000:blank,,,:/home/blank:/bin/bash
+
+
+1. Username
+2. The encrypted password (represented by x, located in the /etc/shadow file)
+3. User ID number (known as UID)
+4. User group ID (known as GID)
+5. User full name
+6. User home directory
+7. The login shell (by default set to bin/bash)
+
+
+Options for the script
+• -h: Pour afficher le help détaillé
+• -g: Pour afficher un menu graphique.
+• -v: Pour afficher le nom des auteurs et version du code.
+• -m: Pour afficher un menu textuel
+• -n : afficher le nombre d’utilisateurs
+• -p : afficher les répertoires personnels des utilisateurs
+• -G : utilisateurs appartenant au même groupe
+• -t : type de l’utilisasteurs
+
+
+
+
+
+
+
+
